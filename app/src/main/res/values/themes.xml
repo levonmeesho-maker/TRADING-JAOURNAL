@@ -1,0 +1,6 @@
+<resources>
+    <style name="Theme.TradingJournal" parent="Theme.AppCompat.Light.NoActionBar">
+        <item name="android:statusBarColor">#A9791F</item>
+        <item name="android:windowBackground">#FFFEFB</item>
+    </style>
+</resources>
