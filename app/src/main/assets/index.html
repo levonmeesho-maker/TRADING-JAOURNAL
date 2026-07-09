@@ -6,9 +6,9 @@
 <script src="https://cdnjs.cloudflare.com/ajax/libs/exceljs/4.4.0/exceljs.min.js"></script>
 <style>
   :root{
-    --gold:#a9791f;
+    --blue:#a9791f;
     --gold-dark:#8a6416;
-    --cream:#fffefb;
+    --green:#fffefb;
     --ink:#1c1c1c;
     --border:#d8d2c4;
     --header-bg:#e7dcc0;
@@ -194,6 +194,53 @@
   }
   .trade-chip:hover{ background:#f3ead0; }
   .trade-chip.selected{ background:var(--gold); color:#fff; }
+
+  .folder-chip{
+    background:#fffaf0;
+    border:1px solid var(--gold);
+    color:var(--gold-dark);
+    font-family: Arial, sans-serif;
+    font-weight:bold;
+    font-size:0.95rem;
+    padding:16px 22px;
+    border-radius:8px;
+    cursor:pointer;
+    display:flex;
+    flex-direction:column;
+    align-items:flex-start;
+    gap:6px;
+    min-width:160px;
+  }
+  .folder-chip:hover{ background:#f3ead0; }
+  .folder-count{
+    font-weight:normal;
+    font-size:0.78rem;
+    color:var(--muted);
+  }
+  .folder-heading{
+    font-family: Georgia, serif;
+    color:var(--gold-dark);
+    margin:0;
+    font-size:1.1rem;
+  }
+  .folder-header-row{
+    display:flex;
+    justify-content:space-between;
+    align-items:center;
+    margin-bottom:16px;
+  }
+  .folder-back-btn{
+    background:#fff;
+    border:1px solid var(--gold);
+    color:var(--gold-dark);
+    font-family: Arial, sans-serif;
+    font-weight:bold;
+    font-size:0.85rem;
+    cursor:pointer;
+    padding:8px 18px;
+    border-radius:6px;
+  }
+  .folder-back-btn:hover{ background:#f3ead0; }
 
   .empty-msg{
     font-family: Arial, sans-serif;
@@ -431,6 +478,8 @@ function loadTrades(){
 
 let trades = loadTrades();
 let selectedTradeIndex = null;
+let selectedYear = null;
+let selectedMonthKey = null;
 
 let tempBeforeImage = "";
 let tempAfterImage = "";
@@ -564,35 +613,138 @@ document.getElementById('addBtn').addEventListener('click', ()=>{
   alert('Trade added.');
 });
 
+const MONTH_NAMES = ['January','February','March','April','May','June','July','August','September','October','November','December'];
+
+function getYearMonthInfo(dateStr){
+  const parts = dateStr.split('-');
+  const year = parts[0];
+  const monthNum = parseInt(parts[1], 10);
+  const monthName = MONTH_NAMES[monthNum-1] || 'Unknown';
+  return { year, monthNum, monthName, monthKey: `${monthName}-${year}` };
+}
+
+function makeFolderHeaderRow(headingText, onBack){
+  const row = document.createElement('div');
+  row.className = 'folder-header-row';
+
+  const heading = document.createElement('h4');
+  heading.className = 'folder-heading';
+  heading.textContent = headingText;
+  row.appendChild(heading);
+
+  const backBtn = document.createElement('button');
+  backBtn.type = 'button';
+  backBtn.className = 'folder-back-btn';
+  backBtn.textContent = 'Back';
+  backBtn.addEventListener('click', onBack);
+  row.appendChild(backBtn);
+
+  return row;
+}
+
 function renderTradeList(){
   const listEl = document.getElementById('tradeList');
   const detailWrap = document.getElementById('tradeDetailWrap');
   listEl.innerHTML = '';
+  detailWrap.innerHTML = '';
 
   if(trades.length === 0){
     listEl.innerHTML = '<p class="empty-msg">No trades logged yet. Add one from the Trade tab.</p>';
-    detailWrap.innerHTML = '';
     return;
   }
 
-  trades.forEach((t, i)=>{
-    const chip = document.createElement('button');
-    chip.type = 'button';
-    chip.className = 'trade-chip' + (selectedTradeIndex === i ? ' selected' : '');
-    chip.textContent = 'Trade ' + (i+1);
-    chip.addEventListener('click', ()=>{
-      selectedTradeIndex = (selectedTradeIndex === i) ? null : i;
+  // ---- Level 2: trades inside a selected month folder ----
+  if(selectedYear && selectedMonthKey){
+    listEl.appendChild(makeFolderHeaderRow('📁 ' + selectedMonthKey, ()=>{
+      selectedMonthKey = null;
+      selectedTradeIndex = null;
+      renderTradeList();
+    }));
+
+    const chipsWrap = document.createElement('div');
+    chipsWrap.className = 'trade-list';
+    trades.forEach((t, i)=>{
+      const info = getYearMonthInfo(t.date);
+      if(info.year === selectedYear && info.monthKey === selectedMonthKey){
+        const chip = document.createElement('button');
+        chip.type = 'button';
+        chip.className = 'trade-chip' + (selectedTradeIndex === i ? ' selected' : '');
+        chip.textContent = 'Trade ' + (i+1);
+        chip.addEventListener('click', ()=>{
+          selectedTradeIndex = (selectedTradeIndex === i) ? null : i;
+          renderTradeList();
+        });
+        chipsWrap.appendChild(chip);
+      }
+    });
+    listEl.appendChild(chipsWrap);
+
+    if(selectedTradeIndex !== null && trades[selectedTradeIndex]){
+      detailWrap.appendChild(buildTradeDetail(trades[selectedTradeIndex], selectedTradeIndex));
+    }
+    return;
+  }
+
+  // ---- Level 1: month folders inside a selected year folder ----
+  if(selectedYear && !selectedMonthKey){
+    listEl.appendChild(makeFolderHeaderRow('📁 ' + selectedYear, ()=>{
+      selectedYear = null;
+      renderTradeList();
+    }));
+
+    const monthCounts = new Map(); // monthKey -> {count, monthNum}
+    trades.forEach(t=>{
+      const info = getYearMonthInfo(t.date);
+      if(info.year === selectedYear){
+        const existing = monthCounts.get(info.monthKey);
+        monthCounts.set(info.monthKey, { count: (existing ? existing.count : 0) + 1, monthNum: info.monthNum });
+      }
+    });
+
+    const sortedMonths = [...monthCounts.entries()].sort((a,b)=> b[1].monthNum - a[1].monthNum);
+
+    const folderWrap = document.createElement('div');
+    folderWrap.className = 'trade-list';
+    sortedMonths.forEach(([monthKey, info])=>{
+      const folder = document.createElement('button');
+      folder.type = 'button';
+      folder.className = 'folder-chip';
+      folder.innerHTML = `📁 ${monthKey} <span class="folder-count">${info.count} trade${info.count===1?'':'s'}</span>`;
+      folder.addEventListener('click', ()=>{
+        selectedMonthKey = monthKey;
+        selectedTradeIndex = null;
+        renderTradeList();
+      });
+      folderWrap.appendChild(folder);
+    });
+    listEl.appendChild(folderWrap);
+    return;
+  }
+
+  // ---- Level 0: year folders ----
+  const yearCounts = new Map();
+  trades.forEach(t=>{
+    const info = getYearMonthInfo(t.date);
+    yearCounts.set(info.year, (yearCounts.get(info.year) || 0) + 1);
+  });
+  const sortedYears = [...yearCounts.entries()].sort((a,b)=> b[0] - a[0]);
+
+  const yearWrap = document.createElement('div');
+  yearWrap.className = 'trade-list';
+  sortedYears.forEach(([year, count])=>{
+    const folder = document.createElement('button');
+    folder.type = 'button';
+    folder.className = 'folder-chip';
+    folder.innerHTML = `📁 ${year} <span class="folder-count">${count} trade${count===1?'':'s'}</span>`;
+    folder.addEventListener('click', ()=>{
+      selectedYear = year;
+      selectedMonthKey = null;
+      selectedTradeIndex = null;
       renderTradeList();
     });
-    listEl.appendChild(chip);
+    yearWrap.appendChild(folder);
   });
-
-  if(selectedTradeIndex !== null && trades[selectedTradeIndex]){
-    detailWrap.innerHTML = '';
-    detailWrap.appendChild(buildTradeDetail(trades[selectedTradeIndex], selectedTradeIndex));
-  } else {
-    detailWrap.innerHTML = '';
-  }
+  listEl.appendChild(yearWrap);
 }
 
 function buildTradeDetail(t, i){
@@ -678,14 +830,14 @@ document.getElementById('exportBtn').addEventListener('click', async ()=>{
       { header: 'Before', key: 'before', width: 16 },
       { header: 'After', key: 'after', width: 16 }
     ];
- 
+
     const headerRow = sheet.getRow(1);
     headerRow.eachCell(cell=>{
       cell.font = { bold: true };
       cell.fill = { type:'pattern', pattern:'solid', fgColor:{argb:'FFE7DCC0'} };
       cell.alignment = { horizontal:'center', vertical:'middle' };
     });
- 
+
     trades.forEach((t, idx)=>{
       const rowIndex = idx + 2;
       const row = sheet.getRow(rowIndex);
@@ -701,7 +853,7 @@ document.getElementById('exportBtn').addEventListener('click', async ()=>{
       row.getCell(8).value = t.logic || '';
       row.getCell(8).alignment = { wrapText: true, vertical: 'top' };
       row.height = 80;
- 
+
       ['beforeImage','afterImage'].forEach((field, colOffset)=>{
         const col = 9 + colOffset;
         if(t[field]){
@@ -716,11 +868,11 @@ document.getElementById('exportBtn').addEventListener('click', async ()=>{
         }
       });
     });
- 
+
     const buffer = await workbook.xlsx.writeBuffer();
     const stamp = new Date().toISOString().slice(0,10);
     const filename = `trading-journal-${stamp}.xlsx`;
- 
+
     if(window.AndroidBridge && window.AndroidBridge.saveExcelFile){
       const base64 = arrayBufferToBase64(buffer);
       window.AndroidBridge.saveExcelFile(base64, filename);
@@ -742,7 +894,7 @@ document.getElementById('exportBtn').addEventListener('click', async ()=>{
     btn.textContent = 'EXPORT TO EXCEL';
   }
 });
- 
+
 function arrayBufferToBase64(buffer){
   let binary = '';
   const bytes = new Uint8Array(buffer);
@@ -752,14 +904,13 @@ function arrayBufferToBase64(buffer){
   }
   return btoa(binary);
 }
- 
+
 document.getElementById('direction').value = 'BUY';
 updateSummary();
 if(!storageOK){
   setStatus('Auto-save unavailable — use Export to Excel to keep your data');
 }
 </script>
- 
+
 </body>
 </html>
- 
