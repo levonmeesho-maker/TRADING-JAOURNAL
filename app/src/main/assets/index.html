@@ -22,33 +22,68 @@
     background:var(--cream);
     font-family: Georgia, 'Times New Roman', serif;
     color:var(--ink);
-    padding:40px 48px 80px;
+    padding-bottom:60px;
   }
   header{
     display:flex;
     justify-content:space-between;
     align-items:flex-start;
     border-bottom:2px solid var(--gold);
-    padding-bottom:14px;
-    margin-bottom:28px;
+    padding:28px 32px 14px;
   }
   h1{
     color:var(--gold);
-    font-size:2.1rem;
+    font-size:1.9rem;
     margin:0;
     letter-spacing:0.5px;
   }
   .subtitle{ text-align:center; flex:1; }
-  .subtitle h2{ margin:6px 0 0; font-size:1.3rem; font-weight:700; }
-  .date{ color:#444; font-size:0.95rem; margin-top:4px; }
+  .subtitle h2{ margin:6px 0 0; font-size:1.2rem; font-weight:700; }
+  .date{ color:#444; font-size:0.9rem; margin-top:4px; }
+
+  nav.tabbar{
+    display:flex;
+    background:var(--header-bg);
+    border-bottom:2px solid var(--gold);
+  }
+  nav.tabbar button{
+    flex:1;
+    padding:16px 8px;
+    background:none;
+    border:none;
+    font-family: Georgia, serif;
+    font-weight:700;
+    font-size:1rem;
+    color:var(--gold-dark);
+    cursor:pointer;
+    border-bottom:3px solid transparent;
+  }
+  nav.tabbar button.active{
+    color:var(--ink);
+    border-bottom:3px solid var(--gold);
+    background:var(--cream);
+  }
+  nav.tabbar button:hover{ background:#f3ead0; }
+
+  .page{ display:none; padding:28px 32px; }
+  .page.active{ display:block; }
 
   form.entry{
     display:flex;
-    gap:14px;
-    flex-wrap:wrap;
-    margin-bottom:18px;
+    flex-direction:column;
+    gap:16px;
+    max-width:560px;
   }
-  form.entry input, form.entry select{
+  .field-row{ display:flex; gap:14px; flex-wrap:wrap; }
+  .field{ display:flex; flex-direction:column; gap:4px; flex:1; min-width:150px; }
+  .field label{
+    font-family: Arial, Helvetica, sans-serif;
+    font-size:0.78rem;
+    color:var(--muted);
+    text-transform:uppercase;
+    letter-spacing:0.4px;
+  }
+  form.entry input, form.entry select, form.entry textarea{
     font-family: Arial, Helvetica, sans-serif;
     font-size:0.95rem;
     padding:10px 12px;
@@ -56,32 +91,64 @@
     border-radius:4px;
     color:var(--ink);
     background:#fff;
+    width:100%;
   }
-  #date{ width:170px; }
-  #pair{ width:150px; }
-  #direction{ width:130px; }
-  #plannedRR{ width:140px; }
-  #marketMove{ width:150px; }
-  #resultR{ width:150px; }
+  form.entry textarea{
+    min-height:100px;
+    resize:vertical;
+    font-family: Arial, sans-serif;
+  }
 
-  .action-row{
-    display:flex;
-    align-items:center;
-    gap:12px;
-    margin-bottom:32px;
-    flex-wrap:wrap;
+  .img-upload-row{ display:flex; gap:16px; flex-wrap:wrap; }
+  .img-upload-box{
+    flex:1;
+    min-width:160px;
+    border:1px dashed var(--gold);
+    border-radius:6px;
+    padding:14px;
+    text-align:center;
+    background:#fffaf0;
   }
+  .img-upload-box p{
+    margin:0 0 10px;
+    font-family: Arial, sans-serif;
+    font-size:0.8rem;
+    color:var(--gold-dark);
+    font-weight:bold;
+    text-transform:uppercase;
+    letter-spacing:0.4px;
+  }
+  .img-upload-box img{
+    max-width:100%;
+    max-height:140px;
+    border-radius:4px;
+    display:block;
+    margin:0 auto 10px;
+  }
+  .img-upload-box button{
+    background:#fff;
+    border:1px solid var(--gold);
+    color:var(--gold-dark);
+    font-family: Arial, sans-serif;
+    font-size:0.8rem;
+    padding:8px 14px;
+    border-radius:4px;
+    cursor:pointer;
+  }
+  .img-upload-box button:hover{ background:#f3ead0; }
+
   button.add{
     background:var(--gold);
     color:#fff;
     border:none;
-    padding:12px 22px;
+    padding:13px 26px;
     font-family: Arial, Helvetica, sans-serif;
     font-weight:bold;
     letter-spacing:0.5px;
     border-radius:4px;
     cursor:pointer;
-    font-size:0.9rem;
+    font-size:0.95rem;
+    align-self:flex-start;
   }
   button.add:hover{ background:var(--gold-dark); }
 
@@ -96,141 +163,128 @@
     border-radius:4px;
     cursor:pointer;
     font-size:0.9rem;
-    display:flex;
-    align-items:center;
-    gap:8px;
+    margin-bottom:22px;
   }
   .export-btn:hover{ background:#173a23; }
   .export-btn:disabled{ background:#9c9c9c; cursor:wait; }
 
   .save-status{
     font-family: Arial, Helvetica, sans-serif;
-    font-size:0.82rem;
+    font-size:0.8rem;
     color:var(--muted);
+    margin-left:14px;
   }
 
-  table{
-    width:100%;
-    border-collapse:collapse;
-    margin-bottom:40px;
-    font-family: Arial, Helvetica, sans-serif;
+  .trade-list{
+    display:flex;
+    flex-wrap:wrap;
+    gap:12px;
+    margin-bottom:24px;
   }
-  thead th{
-    background:var(--header-bg);
-    text-align:center;
-    padding:14px 8px;
-    font-family: Georgia, serif;
-    font-weight:700;
-    border:1px solid var(--border);
+  .trade-chip{
+    background:#fff;
+    border:1px solid var(--gold);
+    color:var(--gold-dark);
+    font-family: Arial, sans-serif;
+    font-weight:bold;
     font-size:0.9rem;
+    padding:12px 20px;
+    border-radius:6px;
+    cursor:pointer;
   }
-  tbody td{
-    text-align:center;
-    padding:12px 8px;
+  .trade-chip:hover{ background:#f3ead0; }
+  .trade-chip.selected{ background:var(--gold); color:#fff; }
+
+  .empty-msg{
+    font-family: Arial, sans-serif;
+    color:var(--muted);
+    font-style:italic;
+  }
+
+  .trade-detail{
     border:1px solid var(--border);
-    font-size:0.95rem;
+    border-radius:8px;
+    padding:22px;
+    max-width:640px;
+    background:#fff;
   }
-  tbody tr:nth-child(even){ background:#fdfcf9; }
+  .trade-detail h3{
+    margin:0 0 16px;
+    font-family: Georgia, serif;
+    color:var(--gold-dark);
+  }
+  .detail-grid{
+    display:grid;
+    grid-template-columns:1fr 1fr;
+    gap:12px 24px;
+    font-family: Arial, Helvetica, sans-serif;
+    font-size:0.95rem;
+    margin-bottom:18px;
+  }
+  .detail-grid .k{
+    font-size:0.75rem;
+    text-transform:uppercase;
+    letter-spacing:0.4px;
+    color:var(--muted);
+    margin-bottom:2px;
+  }
   .buy{ color:var(--green); font-weight:700; }
   .sell{ color:var(--red); font-weight:700; }
   .result-pos{ color:var(--green); font-weight:700; }
   .result-neg{ color:var(--red); font-weight:700; }
-  .empty-row td{ color:var(--muted); font-style:italic; padding:20px; }
 
-  h3.summary-title{ font-size:1.5rem; margin-bottom:16px; }
-  table.summary td{
-    padding:14px 16px;
+  .detail-logic{
+    font-family: Arial, sans-serif;
+    font-size:0.92rem;
+    background:#faf6ea;
     border:1px solid var(--border);
-    font-family: Georgia, serif;
+    border-radius:6px;
+    padding:14px;
+    margin-bottom:18px;
+    white-space:pre-wrap;
+    line-height:1.5;
   }
+  .detail-images{ display:flex; gap:18px; flex-wrap:wrap; }
+  .detail-images div{ text-align:center; }
+  .detail-images p{
+    font-family: Arial, sans-serif;
+    font-size:0.75rem;
+    text-transform:uppercase;
+    color:var(--muted);
+    margin:0 0 8px;
+  }
+  .detail-images img{
+    width:150px;
+    height:110px;
+    object-fit:cover;
+    border-radius:6px;
+    border:1px solid var(--border);
+    cursor:pointer;
+  }
+  .no-image{
+    width:150px;
+    height:110px;
+    border:1px dashed var(--border);
+    border-radius:6px;
+    display:flex;
+    align-items:center;
+    justify-content:center;
+    color:var(--muted);
+    font-family: Arial, sans-serif;
+    font-size:0.8rem;
+  }
+
+  h3.summary-title{ font-size:1.4rem; margin:0 0 16px; }
+  table.summary{ width:100%; max-width:520px; border-collapse:collapse; font-family: Arial, Helvetica, sans-serif; }
+  table.summary td{ padding:14px 16px; border:1px solid var(--border); font-family: Georgia, serif; }
   table.summary td.label{ text-align:center; width:50%; }
   table.summary td.value{ text-align:center; }
 
-  .del-btn{
-    background:none;
-    border:none;
-    color:#b33;
-    cursor:pointer;
-    font-family: Arial, sans-serif;
-    font-size:0.85rem;
-    text-decoration:underline;
-  }
-
-  td.editable{ cursor:text; position:relative; }
-  td.editable:hover{
-    background:#faf6ea;
-    outline:1px dashed var(--gold);
-    outline-offset:-2px;
-  }
-  td.editable:focus{
-    background:#fffaf0;
-    outline:2px solid var(--gold);
-    outline-offset:-2px;
-  }
-  select.dir-edit{
-    font-family: Arial, sans-serif;
-    font-size:0.9rem;
-    padding:4px 6px;
-    border:1px solid var(--gold);
-    border-radius:3px;
-  }
-  .hint{
-    font-family: Arial, sans-serif;
-    font-size:0.8rem;
-    color:var(--muted);
-    margin:-24px 0 20px;
-  }
-
-  /* image cells */
-  .img-cell{ width:90px; }
-  .img-thumb{
-    width:64px;
-    height:64px;
-    object-fit:cover;
-    border-radius:4px;
-    border:1px solid var(--border);
-    cursor:pointer;
-    display:block;
-    margin:0 auto;
-  }
-  .img-upload-btn{
-    background:#fff;
-    border:1px dashed var(--gold);
-    color:var(--gold-dark);
-    font-family: Arial, sans-serif;
-    font-size:0.75rem;
-    padding:8px 6px;
-    border-radius:4px;
-    cursor:pointer;
-    width:64px;
-  }
-  .img-upload-btn:hover{ background:#faf6ea; }
-
-  /* logic cell */
-  .logic-cell{ width:130px; }
-  .logic-btn{
-    background:#fff;
-    border:1px solid var(--gold);
-    color:var(--gold-dark);
-    font-family: Arial, sans-serif;
-    font-size:0.78rem;
-    padding:8px 10px;
-    border-radius:4px;
-    cursor:pointer;
-    max-width:150px;
-    white-space:nowrap;
-    overflow:hidden;
-    text-overflow:ellipsis;
-  }
-  .logic-btn:hover{ background:#faf6ea; }
-  .logic-btn.filled{ border-color:var(--green); color:#1f4a2e; }
-
-  /* modal */
   .modal-overlay{
     display:none;
     position:fixed;
     inset:0;
-    background:rgba(0,0,0,0.45);
+    background:rgba(0,0,0,0.5);
     z-index:1000;
     align-items:center;
     justify-content:center;
@@ -239,60 +293,29 @@
   .modal-box{
     background:#fff;
     border-radius:8px;
-    padding:24px;
+    padding:20px;
     width:90%;
     max-width:520px;
-    box-shadow:0 10px 40px rgba(0,0,0,0.3);
+    text-align:center;
     font-family: Arial, Helvetica, sans-serif;
   }
-  .modal-box h4{
-    margin:0 0 14px;
-    font-family: Georgia, serif;
-    color:var(--gold-dark);
-  }
-  .modal-box textarea{
-    width:100%;
-    min-height:140px;
-    padding:10px;
-    border:1px solid #ccc;
-    border-radius:4px;
-    font-family: Arial, sans-serif;
-    font-size:0.95rem;
-    resize:vertical;
-  }
-  .modal-actions{
-    display:flex;
-    justify-content:flex-end;
-    gap:10px;
+  .modal-box img{ max-width:100%; max-height:60vh; border-radius:4px; }
+  .modal-box button{
     margin-top:16px;
-  }
-  .modal-actions button{
-    font-family: Arial, sans-serif;
-    font-size:0.9rem;
-    padding:9px 18px;
+    background:var(--gold);
+    color:#fff;
+    border:none;
+    padding:9px 20px;
     border-radius:4px;
     cursor:pointer;
-    border:none;
-  }
-  .modal-save{ background:var(--gold); color:#fff; }
-  .modal-save:hover{ background:var(--gold-dark); }
-  .modal-cancel{ background:#eee; color:#333; }
-  .modal-cancel:hover{ background:#ddd; }
-
-  .img-modal-content{
-    text-align:center;
-  }
-  .img-modal-content img{
-    max-width:100%;
-    max-height:60vh;
-    border-radius:4px;
+    font-family: Arial, sans-serif;
   }
 
   @media (max-width:700px){
-    header{flex-direction:column; gap:10px;}
-    form.entry{flex-direction:column;}
-    form.entry input, form.entry select{width:100%;}
-    table{ font-size:0.8rem; }
+    header{ flex-direction:column; gap:8px; padding:20px; }
+    .page{ padding:20px; }
+    .detail-grid{ grid-template-columns:1fr; }
+    nav.tabbar button{ font-size:0.82rem; padding:14px 4px; }
   }
 </style>
 </head>
@@ -304,82 +327,98 @@
   <div class="date" id="todayDate"></div>
 </header>
 
-<form class="entry" id="entryForm">
-  <input type="date" id="date" required>
-  <input type="text" id="pair" placeholder="PAIR" required style="text-transform:uppercase;">
-  <select id="direction">
-    <option value="BUY">BUY</option>
-    <option value="SELL">SELL</option>
-  </select>
-  <input type="number" step="0.1" id="plannedRR" placeholder="Planned RR" required>
-  <input type="number" step="0.1" id="marketMove" placeholder="Market Move" required>
-  <input type="number" step="0.1" id="resultR" placeholder="Result (R)" required>
-</form>
+<nav class="tabbar">
+  <button class="tab-btn active" data-page="trade">Trade</button>
+  <button class="tab-btn" data-page="tradedata">Trade Data</button>
+  <button class="tab-btn" data-page="performance">Performance</button>
+</nav>
 
-<div class="action-row">
-  <button class="add" id="addBtn">ADD TRADE</button>
+<section class="page active" id="page-trade">
+  <form class="entry" id="entryForm">
+    <div class="field-row">
+      <div class="field">
+        <label for="date">Date</label>
+        <input type="date" id="date" required>
+      </div>
+      <div class="field">
+        <label for="pair">Pair</label>
+        <input type="text" id="pair" placeholder="e.g. XAUUSD" required style="text-transform:uppercase;">
+      </div>
+      <div class="field">
+        <label for="direction">Direction</label>
+        <select id="direction">
+          <option value="BUY">BUY</option>
+          <option value="SELL">SELL</option>
+        </select>
+      </div>
+    </div>
+
+    <div class="field-row">
+      <div class="field">
+        <label for="plannedRR">Planned RR</label>
+        <input type="number" step="0.1" id="plannedRR" placeholder="e.g. 6" required>
+      </div>
+      <div class="field">
+        <label for="marketMove">Market Move</label>
+        <input type="number" step="0.1" id="marketMove" placeholder="e.g. -1" required>
+      </div>
+      <div class="field">
+        <label for="resultR">Result (R)</label>
+        <input type="number" step="0.1" id="resultR" placeholder="e.g. -1" required>
+      </div>
+    </div>
+
+    <div class="field">
+      <label for="logicInput">Trade Logic</label>
+      <textarea id="logicInput" placeholder="Why did you take this trade? Setup, confluence, mistakes, lessons..."></textarea>
+    </div>
+
+    <div class="img-upload-row">
+      <div class="img-upload-box" id="beforeBox">
+        <p>Before</p>
+        <button type="button" id="beforeUploadBtn">+ Add Image</button>
+      </div>
+      <div class="img-upload-box" id="afterBox">
+        <p>After</p>
+        <button type="button" id="afterUploadBtn">+ Add Image</button>
+      </div>
+    </div>
+
+    <button class="add" id="addBtn" type="button">ADD TRADE</button>
+  </form>
+</section>
+
+<section class="page" id="page-tradedata">
   <button class="export-btn" id="exportBtn" type="button">EXPORT TO EXCEL</button>
   <span class="save-status" id="saveStatus"></span>
-</div>
 
-<table>
-  <thead>
-    <tr>
-      <th>Date</th>
-      <th>Pair</th>
-      <th>Direction</th>
-      <th>Planned RR</th>
-      <th>Market Move</th>
-      <th>Result</th>
-      <th>Trade Logic</th>
-      <th>Before</th>
-      <th>After</th>
-    </tr>
-  </thead>
-  <tbody id="tradesBody"></tbody>
-</table>
-<p class="hint">Tip: click any Date, Pair, Planned RR, Market Move, or Result cell to edit it directly. Use Trade Logic to write your reasoning, and Before/After to attach chart screenshots.</p>
+  <div class="trade-list" id="tradeList"></div>
+  <div id="tradeDetailWrap"></div>
+</section>
 
-<h3 class="summary-title">Performance Summary</h3>
-<table class="summary">
-  <tr><td class="label">Total Trades</td><td class="value" id="totalTrades">0</td></tr>
-  <tr><td class="label">Winning Trades</td><td class="value" id="winTrades">0</td></tr>
-  <tr><td class="label">Losing Trades</td><td class="value" id="loseTrades">0</td></tr>
-  <tr><td class="label">Total RR</td><td class="value" id="totalRR">0.00R</td></tr>
-  <tr><td class="label">Win Rate</td><td class="value" id="winRate">0.0%</td></tr>
-</table>
+<section class="page" id="page-performance">
+  <h3 class="summary-title">Performance Summary</h3>
+  <table class="summary">
+    <tr><td class="label">Total Trades</td><td class="value" id="totalTrades">0</td></tr>
+    <tr><td class="label">Winning Trades</td><td class="value" id="winTrades">0</td></tr>
+    <tr><td class="label">Losing Trades</td><td class="value" id="loseTrades">0</td></tr>
+    <tr><td class="label">Total RR</td><td class="value" id="totalRR">0.00R</td></tr>
+    <tr><td class="label">Win Rate</td><td class="value" id="winRate">0.0%</td></tr>
+  </table>
+</section>
 
-<!-- Trade logic modal -->
-<div class="modal-overlay" id="logicModal">
-  <div class="modal-box">
-    <h4>Trade Logic</h4>
-    <textarea id="logicTextarea" placeholder="Why did you take this trade? Setup, confluence, mistakes, lessons..."></textarea>
-    <div class="modal-actions">
-      <button class="modal-cancel" id="logicCancel" type="button">Cancel</button>
-      <button class="modal-save" id="logicSave" type="button">Save</button>
-    </div>
-  </div>
-</div>
-
-<!-- Image preview modal -->
 <div class="modal-overlay" id="imgModal">
-  <div class="modal-box img-modal-content">
-    <h4 id="imgModalTitle">Image</h4>
+  <div class="modal-box">
+    <h4 id="imgModalTitle" style="margin-top:0;font-family:Georgia,serif;color:var(--gold-dark);">Image</h4>
     <img id="imgModalPic" src="" alt="Trade screenshot">
-    <div class="modal-actions">
-      <button class="modal-cancel" id="imgReplace" type="button">Replace</button>
-      <button class="modal-save" id="imgClose" type="button">Close</button>
-    </div>
+    <div><button id="imgModalClose" type="button">Close</button></div>
   </div>
 </div>
 
 <input type="file" id="hiddenImgInput" accept="image/*" style="display:none;">
 
 <script>
-const DEFAULT_TRADES = [
-  {date:"2026-07-06", pair:"XAUUSD", direction:"BUY", plannedRR:6, marketMove:-1, result:-1, logic:"", beforeImage:"", afterImage:""},
-  {date:"2026-07-06", pair:"XAUUSD", direction:"BUY", plannedRR:11, marketMove:11, result:11, logic:"", beforeImage:"", afterImage:""}
-];
+const DEFAULT_TRADES = [];
 
 let storageOK = true;
 function loadTrades(){
@@ -391,6 +430,11 @@ function loadTrades(){
 }
 
 let trades = loadTrades();
+let selectedTradeIndex = null;
+
+let tempBeforeImage = "";
+let tempAfterImage = "";
+let pendingImageTarget = null;
 
 function setStatus(msg){
   const el = document.getElementById('saveStatus');
@@ -411,7 +455,6 @@ const todayEl = document.getElementById('todayDate');
 const today = new Date();
 todayEl.textContent = today.getDate() + "/" + (today.getMonth()+1) + "/" + today.getFullYear();
 
-// ---- Disable future dates, auto re-enable at midnight ----
 function todayISO(){
   const d = new Date();
   const y = d.getFullYear();
@@ -419,22 +462,186 @@ function todayISO(){
   const day = String(d.getDate()).padStart(2,'0');
   return `${y}-${m}-${day}`;
 }
-
 function applyDateLimit(){
   document.getElementById('date').max = todayISO();
 }
 applyDateLimit();
-
 function scheduleMidnightRefresh(){
   const now = new Date();
   const nextMidnight = new Date(now.getFullYear(), now.getMonth(), now.getDate()+1, 0, 0, 5);
-  const msUntilMidnight = nextMidnight - now;
-  setTimeout(()=>{
-    applyDateLimit();
-    scheduleMidnightRefresh(); // reschedule for the following midnight
-  }, msUntilMidnight);
+  setTimeout(()=>{ applyDateLimit(); scheduleMidnightRefresh(); }, nextMidnight - now);
 }
 scheduleMidnightRefresh();
+
+document.querySelectorAll('.tab-btn').forEach(btn=>{
+  btn.addEventListener('click', ()=>{
+    document.querySelectorAll('.tab-btn').forEach(b=>b.classList.remove('active'));
+    document.querySelectorAll('.page').forEach(p=>p.classList.remove('active'));
+    btn.classList.add('active');
+    document.getElementById('page-' + btn.dataset.page).classList.add('active');
+    if(btn.dataset.page === 'tradedata'){
+      renderTradeList();
+    }
+  });
+});
+
+const hiddenImgInput = document.getElementById('hiddenImgInput');
+
+function renderUploadBox(target){
+  const box = document.getElementById(target === 'before' ? 'beforeBox' : 'afterBox');
+  const label = target === 'before' ? 'Before' : 'After';
+  const value = target === 'before' ? tempBeforeImage : tempAfterImage;
+  if(value){
+    box.innerHTML = `<p>${label}</p><img src="${value}" alt="${label}"><button type="button" data-target="${target}" class="change-img-btn">Change</button>`;
+  } else {
+    box.innerHTML = `<p>${label}</p><button type="button" data-target="${target}" class="change-img-btn">+ Add Image</button>`;
+  }
+  box.querySelector('.change-img-btn').addEventListener('click', ()=>{
+    pendingImageTarget = target;
+    hiddenImgInput.click();
+  });
+}
+renderUploadBox('before');
+renderUploadBox('after');
+
+hiddenImgInput.addEventListener('change', (e)=>{
+  const file = e.target.files[0];
+  if(!file || !pendingImageTarget) return;
+  const reader = new FileReader();
+  reader.onload = (evt)=>{
+    if(pendingImageTarget === 'before'){
+      tempBeforeImage = evt.target.result;
+      renderUploadBox('before');
+    } else {
+      tempAfterImage = evt.target.result;
+      renderUploadBox('after');
+    }
+  };
+  reader.readAsDataURL(file);
+  e.target.value = '';
+});
+
+document.getElementById('addBtn').addEventListener('click', ()=>{
+  const dateVal = document.getElementById('date').value;
+  const pairVal = document.getElementById('pair').value.trim().toUpperCase();
+  const dirVal = document.getElementById('direction').value;
+  const rrVal = document.getElementById('plannedRR').value;
+  const moveVal = document.getElementById('marketMove').value;
+  const resultVal = document.getElementById('resultR').value;
+  const logicVal = document.getElementById('logicInput').value.trim();
+
+  if(!dateVal || !pairVal || rrVal==='' || moveVal==='' || resultVal===''){
+    alert('Please fill in Date, Pair, Planned RR, Market Move, and Result before adding a trade.');
+    return;
+  }
+  if(dateVal > todayISO()){
+    alert('You can\'t log a trade for a future date. It will unlock automatically once that day arrives.');
+    return;
+  }
+
+  trades.push({
+    date: dateVal,
+    pair: pairVal,
+    direction: dirVal,
+    plannedRR: Number(rrVal),
+    marketMove: Number(moveVal),
+    result: Number(resultVal),
+    logic: logicVal,
+    beforeImage: tempBeforeImage,
+    afterImage: tempAfterImage
+  });
+
+  saveTrades();
+
+  document.getElementById('entryForm').reset();
+  document.getElementById('direction').value = 'BUY';
+  tempBeforeImage = "";
+  tempAfterImage = "";
+  renderUploadBox('before');
+  renderUploadBox('after');
+  updateSummary();
+
+  alert('Trade added.');
+});
+
+function renderTradeList(){
+  const listEl = document.getElementById('tradeList');
+  const detailWrap = document.getElementById('tradeDetailWrap');
+  listEl.innerHTML = '';
+
+  if(trades.length === 0){
+    listEl.innerHTML = '<p class="empty-msg">No trades logged yet. Add one from the Trade tab.</p>';
+    detailWrap.innerHTML = '';
+    return;
+  }
+
+  trades.forEach((t, i)=>{
+    const chip = document.createElement('button');
+    chip.type = 'button';
+    chip.className = 'trade-chip' + (selectedTradeIndex === i ? ' selected' : '');
+    chip.textContent = 'Trade ' + (i+1);
+    chip.addEventListener('click', ()=>{
+      selectedTradeIndex = (selectedTradeIndex === i) ? null : i;
+      renderTradeList();
+    });
+    listEl.appendChild(chip);
+  });
+
+  if(selectedTradeIndex !== null && trades[selectedTradeIndex]){
+    detailWrap.innerHTML = '';
+    detailWrap.appendChild(buildTradeDetail(trades[selectedTradeIndex], selectedTradeIndex));
+  } else {
+    detailWrap.innerHTML = '';
+  }
+}
+
+function buildTradeDetail(t, i){
+  const wrap = document.createElement('div');
+  wrap.className = 'trade-detail';
+  const dirClass = t.direction === 'BUY' ? 'buy' : 'sell';
+  const resultClass = t.result >= 0 ? 'result-pos' : 'result-neg';
+
+  wrap.innerHTML = `
+    <h3>Trade ${i+1}</h3>
+    <div class="detail-grid">
+      <div><div class="k">Date</div>${t.date}</div>
+      <div><div class="k">Pair</div>${t.pair}</div>
+      <div><div class="k">Direction</div><span class="${dirClass}">${t.direction}</span></div>
+      <div><div class="k">Planned RR</div>${t.plannedRR}</div>
+      <div><div class="k">Market Move</div>${t.marketMove}</div>
+      <div><div class="k">Result</div><span class="${resultClass}">${t.result}R</span></div>
+    </div>
+    <div class="k" style="margin-bottom:6px;">Trade Logic</div>
+    <div class="detail-logic">${t.logic ? t.logic : 'No trade logic written for this trade.'}</div>
+    <div class="detail-images">
+      <div>
+        <p>Before</p>
+        ${t.beforeImage ? `<img src="${t.beforeImage}" class="detail-img-before" alt="Before">` : `<div class="no-image">No image</div>`}
+      </div>
+      <div>
+        <p>After</p>
+        ${t.afterImage ? `<img src="${t.afterImage}" class="detail-img-after" alt="After">` : `<div class="no-image">No image</div>`}
+      </div>
+    </div>
+  `;
+
+  const beforeImgEl = wrap.querySelector('.detail-img-before');
+  if(beforeImgEl) beforeImgEl.addEventListener('click', ()=>openImagePreview('Before — ' + t.pair, t.beforeImage));
+  const afterImgEl = wrap.querySelector('.detail-img-after');
+  if(afterImgEl) afterImgEl.addEventListener('click', ()=>openImagePreview('After — ' + t.pair, t.afterImage));
+
+  return wrap;
+}
+
+const imgModal = document.getElementById('imgModal');
+function openImagePreview(title, src){
+  document.getElementById('imgModalTitle').textContent = title;
+  document.getElementById('imgModalPic').src = src;
+  imgModal.classList.add('open');
+}
+document.getElementById('imgModalClose').addEventListener('click', ()=>{
+  imgModal.classList.remove('open');
+});
 
 function updateSummary(){
   const total = trades.length;
@@ -450,219 +657,6 @@ function updateSummary(){
   document.getElementById('winRate').textContent = winRate.toFixed(1) + '%';
 }
 
-function commitEdit(i, field, rawValue){
-  let value = rawValue;
-  if(field==='plannedRR' || field==='marketMove' || field==='result'){
-    value = parseFloat(rawValue);
-    if(isNaN(value)) value = 0;
-  } else if(field==='pair'){
-    value = rawValue.trim().toUpperCase();
-  } else if(field==='date'){
-    value = rawValue.trim();
-    if(value > todayISO()){
-      alert('You can\'t set a future date. Keeping the previous date.');
-      render();
-      return;
-    }
-  } else {
-    value = rawValue.trim();
-  }
-  trades[i][field] = value;
-  render();
-}
-
-// ---- Trade logic modal ----
-let logicEditingIndex = null;
-const logicModal = document.getElementById('logicModal');
-const logicTextarea = document.getElementById('logicTextarea');
-
-function openLogicModal(i){
-  logicEditingIndex = i;
-  logicTextarea.value = trades[i].logic || '';
-  logicModal.classList.add('open');
-  setTimeout(()=>logicTextarea.focus(), 50);
-}
-document.getElementById('logicCancel').addEventListener('click', ()=>{
-  logicModal.classList.remove('open');
-});
-document.getElementById('logicSave').addEventListener('click', ()=>{
-  if(logicEditingIndex !== null){
-    trades[logicEditingIndex].logic = logicTextarea.value.trim();
-    render();
-  }
-  logicModal.classList.remove('open');
-});
-
-// ---- Image modal ----
-let imgEditingIndex = null;
-let imgEditingField = null;
-const imgModal = document.getElementById('imgModal');
-const imgModalPic = document.getElementById('imgModalPic');
-const imgModalTitle = document.getElementById('imgModalTitle');
-const hiddenImgInput = document.getElementById('hiddenImgInput');
-
-function openImageUpload(i, field){
-  imgEditingIndex = i;
-  imgEditingField = field;
-  hiddenImgInput.click();
-}
-function openImagePreview(i, field){
-  imgEditingIndex = i;
-  imgEditingField = field;
-  imgModalTitle.textContent = (field === 'beforeImage' ? 'Before' : 'After') + ' — ' + trades[i].pair;
-  imgModalPic.src = trades[i][field];
-  imgModal.classList.add('open');
-}
-document.getElementById('imgClose').addEventListener('click', ()=>{
-  imgModal.classList.remove('open');
-});
-document.getElementById('imgReplace').addEventListener('click', ()=>{
-  imgModal.classList.remove('open');
-  hiddenImgInput.click();
-});
-hiddenImgInput.addEventListener('change', (e)=>{
-  const file = e.target.files[0];
-  if(!file || imgEditingIndex === null) return;
-  const reader = new FileReader();
-  reader.onload = (evt)=>{
-    trades[imgEditingIndex][imgEditingField] = evt.target.result;
-    render();
-  };
-  reader.readAsDataURL(file);
-  e.target.value = '';
-});
-
-function render(){
-  const body = document.getElementById('tradesBody');
-  body.innerHTML = '';
-  if(trades.length===0){
-    body.innerHTML = `<tr class="empty-row"><td colspan="9">No trades logged yet. Add your first trade above.</td></tr>`;
-    updateSummary();
-    saveTrades();
-    return;
-  }
-
-  trades.forEach((t, i)=>{
-    const tr = document.createElement('tr');
-    const resultClass = t.result >= 0 ? 'result-pos' : 'result-neg';
-    const dirClass = t.direction === 'BUY' ? 'buy' : 'sell';
-    const logicPreview = t.logic ? t.logic : '';
-
-    tr.innerHTML = `
-      <td class="editable" data-i="${i}" data-field="date" contenteditable="true">${t.date}</td>
-      <td class="editable" data-i="${i}" data-field="pair" contenteditable="true">${t.pair}</td>
-      <td class="dir-cell" data-i="${i}"></td>
-      <td class="editable" data-i="${i}" data-field="plannedRR" contenteditable="true">${t.plannedRR}</td>
-      <td class="editable" data-i="${i}" data-field="marketMove" contenteditable="true">${t.marketMove}</td>
-      <td class="editable ${resultClass}" data-i="${i}" data-field="result" contenteditable="true">${t.result}R</td>
-      <td class="logic-cell"></td>
-      <td class="img-cell" data-field="beforeImage"></td>
-      <td class="img-cell" data-field="afterImage"></td>
-    `;
-    body.appendChild(tr);
-
-    // direction dropdown
-    const dirCell = tr.querySelector('.dir-cell');
-    const select = document.createElement('select');
-    select.className = 'dir-edit ' + dirClass;
-    select.innerHTML = `<option value="BUY"${t.direction==='BUY'?' selected':''}>BUY</option><option value="SELL"${t.direction==='SELL'?' selected':''}>SELL</option>`;
-    select.addEventListener('change', e=>{
-      trades[i].direction = e.target.value;
-      render();
-    });
-    dirCell.appendChild(select);
-
-    // trade logic button
-    const logicCell = tr.querySelector('.logic-cell');
-    const logicBtn = document.createElement('button');
-    logicBtn.type = 'button';
-    logicBtn.className = 'logic-btn' + (t.logic ? ' filled' : '');
-    logicBtn.textContent = t.logic ? (t.logic.length > 18 ? t.logic.slice(0,18)+'…' : t.logic) : '+ Add Logic';
-    logicBtn.title = t.logic || 'Add trade logic';
-    logicBtn.addEventListener('click', ()=>openLogicModal(i));
-    logicCell.appendChild(logicBtn);
-
-    // before / after image cells
-    ['beforeImage','afterImage'].forEach(field=>{
-      const cell = tr.querySelector(`.img-cell[data-field="${field}"]`);
-      if(t[field]){
-        const img = document.createElement('img');
-        img.src = t[field];
-        img.className = 'img-thumb';
-        img.title = 'Click to view / replace';
-        img.addEventListener('click', ()=>openImagePreview(i, field));
-        cell.appendChild(img);
-      } else {
-        const btn = document.createElement('button');
-        btn.type = 'button';
-        btn.className = 'img-upload-btn';
-        btn.textContent = field === 'beforeImage' ? '+ Before' : '+ After';
-        btn.addEventListener('click', ()=>openImageUpload(i, field));
-        cell.appendChild(btn);
-      }
-    });
-  });
-
-  // click-to-edit text cells
-  document.querySelectorAll('td.editable').forEach(td=>{
-    td.addEventListener('focus', ()=>{
-      if(td.dataset.field==='result'){
-        td.textContent = trades[td.dataset.i].result;
-      }
-    });
-    td.addEventListener('blur', ()=>{
-      const i = parseInt(td.dataset.i);
-      const field = td.dataset.field;
-      commitEdit(i, field, td.textContent);
-    });
-    td.addEventListener('keydown', e=>{
-      if(e.key === 'Enter'){
-        e.preventDefault();
-        td.blur();
-      }
-    });
-  });
-
-  updateSummary();
-  saveTrades();
-}
-
-document.getElementById('addBtn').addEventListener('click', ()=>{
-  const dateVal = document.getElementById('date').value;
-  const pairVal = document.getElementById('pair').value.trim().toUpperCase();
-  const dirVal = document.getElementById('direction').value;
-  const rrVal = document.getElementById('plannedRR').value;
-  const moveVal = document.getElementById('marketMove').value;
-  const resultVal = document.getElementById('resultR').value;
-
-  if(!dateVal || !pairVal || rrVal==='' || moveVal==='' || resultVal===''){
-    alert('Please fill in all fields before adding a trade.');
-    return;
-  }
-
-  if(dateVal > todayISO()){
-    alert('You can\'t log a trade for a future date. It will unlock automatically once that day arrives.');
-    return;
-  }
-
-  trades.push({
-    date: dateVal,
-    pair: pairVal,
-    direction: dirVal,
-    plannedRR: Number(rrVal),
-    marketMove: Number(moveVal),
-    result: Number(resultVal),
-    logic: "",
-    beforeImage: "",
-    afterImage: ""
-  });
-
-  document.getElementById('entryForm').reset();
-  document.getElementById('direction').value = 'BUY';
-  render();
-});
-
-// ---- Excel export (with embedded images) ----
 document.getElementById('exportBtn').addEventListener('click', async ()=>{
   const btn = document.getElementById('exportBtn');
   btn.disabled = true;
@@ -672,4 +666,100 @@ document.getElementById('exportBtn').addEventListener('click', async ()=>{
     workbook.creator = 'Trading Journal';
     const sheet = workbook.addWorksheet('Trading Journal');
 
-  
+    sheet.columns = [
+      { header: 'Trade #', key: 'num', width: 10 },
+      { header: 'Date', key: 'date', width: 14 },
+      { header: 'Pair', key: 'pair', width: 12 },
+      { header: 'Direction', key: 'direction', width: 12 },
+      { header: 'Planned RR', key: 'plannedRR', width: 12 },
+      { header: 'Market Move', key: 'marketMove', width: 13 },
+      { header: 'Result (R)', key: 'result', width: 12 },
+      { header: 'Trade Logic', key: 'logic', width: 40 },
+      { header: 'Before', key: 'before', width: 16 },
+      { header: 'After', key: 'after', width: 16 }
+    ];
+ 
+    const headerRow = sheet.getRow(1);
+    headerRow.eachCell(cell=>{
+      cell.font = { bold: true };
+      cell.fill = { type:'pattern', pattern:'solid', fgColor:{argb:'FFE7DCC0'} };
+      cell.alignment = { horizontal:'center', vertical:'middle' };
+    });
+ 
+    trades.forEach((t, idx)=>{
+      const rowIndex = idx + 2;
+      const row = sheet.getRow(rowIndex);
+      row.getCell(1).value = 'Trade ' + (idx+1);
+      row.getCell(2).value = t.date;
+      row.getCell(3).value = t.pair;
+      row.getCell(4).value = t.direction;
+      row.getCell(4).font = { color: { argb: t.direction === 'BUY' ? 'FF1A7A34' : 'FFC0392B' }, bold:true };
+      row.getCell(5).value = t.plannedRR;
+      row.getCell(6).value = t.marketMove;
+      row.getCell(7).value = t.result;
+      row.getCell(7).font = { color: { argb: t.result >= 0 ? 'FF1A7A34' : 'FFC0392B' }, bold:true };
+      row.getCell(8).value = t.logic || '';
+      row.getCell(8).alignment = { wrapText: true, vertical: 'top' };
+      row.height = 80;
+ 
+      ['beforeImage','afterImage'].forEach((field, colOffset)=>{
+        const col = 9 + colOffset;
+        if(t[field]){
+          const match = t[field].match(/^data:image\/(png|jpeg|jpg|gif);base64,/);
+          const ext = match ? (match[1] === 'jpg' ? 'jpeg' : match[1]) : 'png';
+          const base64 = t[field].split(',')[1];
+          const imageId = workbook.addImage({ base64, extension: ext });
+          sheet.addImage(imageId, {
+            tl: { col: col - 1 + 0.05, row: rowIndex - 1 + 0.05 },
+            ext: { width: 90, height: 70 }
+          });
+        }
+      });
+    });
+ 
+    const buffer = await workbook.xlsx.writeBuffer();
+    const stamp = new Date().toISOString().slice(0,10);
+    const filename = `trading-journal-${stamp}.xlsx`;
+ 
+    if(window.AndroidBridge && window.AndroidBridge.saveExcelFile){
+      const base64 = arrayBufferToBase64(buffer);
+      window.AndroidBridge.saveExcelFile(base64, filename);
+    } else {
+      const blob = new Blob([buffer], { type: 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet' });
+      const url = URL.createObjectURL(blob);
+      const a = document.createElement('a');
+      a.href = url;
+      a.download = filename;
+      document.body.appendChild(a);
+      a.click();
+      document.body.removeChild(a);
+      URL.revokeObjectURL(url);
+    }
+  }catch(err){
+    alert('Could not build the Excel file: ' + err.message);
+  }finally{
+    btn.disabled = false;
+    btn.textContent = 'EXPORT TO EXCEL';
+  }
+});
+ 
+function arrayBufferToBase64(buffer){
+  let binary = '';
+  const bytes = new Uint8Array(buffer);
+  const chunk = 8192;
+  for(let i=0; i<bytes.length; i+=chunk){
+    binary += String.fromCharCode.apply(null, bytes.subarray(i, i+chunk));
+  }
+  return btoa(binary);
+}
+ 
+document.getElementById('direction').value = 'BUY';
+updateSummary();
+if(!storageOK){
+  setStatus('Auto-save unavailable — use Export to Excel to keep your data');
+}
+</script>
+ 
+</body>
+</html>
+ 
