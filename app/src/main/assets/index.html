@@ -6,9 +6,9 @@
 <script src="https://cdnjs.cloudflare.com/ajax/libs/exceljs/4.4.0/exceljs.min.js"></script>
 <style>
   :root{
-    --blue:#a9791f;
+    --gold:#a9791f;
     --gold-dark:#8a6416;
-    --green:#fffefb;
+    --cream:#fffefb;
     --ink:#1c1c1c;
     --border:#d8d2c4;
     --header-bg:#e7dcc0;
@@ -22,7 +22,7 @@
     background:var(--cream);
     font-family: Georgia, 'Times New Roman', serif;
     color:var(--ink);
-    padding-bottom:60px;
+    padding-bottom:96px;
   }
   header{
     display:flex;
@@ -44,7 +44,13 @@
   nav.tabbar{
     display:flex;
     background:var(--header-bg);
-    border-bottom:2px solid var(--gold);
+    border-top:2px solid var(--gold);
+    position:fixed;
+    left:0;
+    right:0;
+    bottom:0;
+    z-index:500;
+    box-shadow:0 -2px 10px rgba(0,0,0,0.08);
   }
   nav.tabbar button{
     flex:1;
@@ -56,11 +62,11 @@
     font-size:1rem;
     color:var(--gold-dark);
     cursor:pointer;
-    border-bottom:3px solid transparent;
+    border-top:3px solid transparent;
   }
   nav.tabbar button.active{
     color:var(--ink);
-    border-bottom:3px solid var(--gold);
+    border-top:3px solid var(--gold);
     background:var(--cream);
   }
   nav.tabbar button:hover{ background:#f3ead0; }
@@ -370,12 +376,12 @@
 
 <header>
   <h1>Trading Journal</h1>
-  <div class="subtitle"><h2>UNCHARTED.DEMON</h2></div>
   <div class="date" id="todayDate"></div>
 </header>
 
 <nav class="tabbar">
   <button class="tab-btn active" data-page="trade">Trade</button>
+  <button class="tab-btn" data-page="running">Running Trade</button>
   <button class="tab-btn" data-page="tradedata">Trade Data</button>
   <button class="tab-btn" data-page="performance">Performance</button>
 </nav>
@@ -405,14 +411,6 @@
         <label for="plannedRR">Planned RR</label>
         <input type="number" step="0.1" id="plannedRR" placeholder="e.g. 6" required>
       </div>
-      <div class="field">
-        <label for="marketMove">Market Move</label>
-        <input type="number" step="0.1" id="marketMove" placeholder="e.g. -1" required>
-      </div>
-      <div class="field">
-        <label for="resultR">Result (R)</label>
-        <input type="number" step="0.1" id="resultR" placeholder="e.g. -1" required>
-      </div>
     </div>
 
     <div class="field">
@@ -425,14 +423,15 @@
         <p>Before</p>
         <button type="button" id="beforeUploadBtn">+ Add Image</button>
       </div>
-      <div class="img-upload-box" id="afterBox">
-        <p>After</p>
-        <button type="button" id="afterUploadBtn">+ Add Image</button>
-      </div>
     </div>
 
     <button class="add" id="addBtn" type="button">ADD TRADE</button>
   </form>
+</section>
+
+<section class="page" id="page-running">
+  <div class="trade-list" id="runningList"></div>
+  <div id="runningDetailWrap"></div>
 </section>
 
 <section class="page" id="page-tradedata">
@@ -462,7 +461,7 @@
   </div>
 </div>
 
-<input type="file" id="hiddenImgInput" accept="image/*" style="display:none;">
+<input type="file" id="hiddenImgInput" accept="image/*" style="position:absolute; width:1px; height:1px; opacity:0; overflow:hidden; pointer-events:none;">
 
 <script>
 const DEFAULT_TRADES = [];
@@ -478,12 +477,12 @@ function loadTrades(){
 
 let trades = loadTrades();
 let selectedTradeIndex = null;
-let selectedYear = null;
-let selectedMonthKey = null;
 
 let tempBeforeImage = "";
-let tempAfterImage = "";
-let pendingImageTarget = null;
+let pendingImageTarget = null; // 'before' (entry form) or a trade index (close form)
+
+// temp After-image uploads per running trade, keyed by trade index, until Close Trade is clicked
+let tempCloseAfterImages = {};
 
 function setStatus(msg){
   const el = document.getElementById('saveStatus');
@@ -522,65 +521,78 @@ function scheduleMidnightRefresh(){
 }
 scheduleMidnightRefresh();
 
+function switchToTab(pageName){
+  document.querySelectorAll('.tab-btn').forEach(b=>b.classList.remove('active'));
+  document.querySelectorAll('.page').forEach(p=>p.classList.remove('active'));
+  document.querySelector(`.tab-btn[data-page="${pageName}"]`).classList.add('active');
+  document.getElementById('page-' + pageName).classList.add('active');
+  if(pageName === 'tradedata') renderTradeList();
+  if(pageName === 'running') renderRunningList();
+}
+
 document.querySelectorAll('.tab-btn').forEach(btn=>{
-  btn.addEventListener('click', ()=>{
-    document.querySelectorAll('.tab-btn').forEach(b=>b.classList.remove('active'));
-    document.querySelectorAll('.page').forEach(p=>p.classList.remove('active'));
-    btn.classList.add('active');
-    document.getElementById('page-' + btn.dataset.page).classList.add('active');
-    if(btn.dataset.page === 'tradedata'){
-      renderTradeList();
-    }
-  });
+  btn.addEventListener('click', ()=> switchToTab(btn.dataset.page));
 });
 
 const hiddenImgInput = document.getElementById('hiddenImgInput');
 
-function renderUploadBox(target){
-  const box = document.getElementById(target === 'before' ? 'beforeBox' : 'afterBox');
+// target: 'before' -> the entry form box; a number -> that running trade's After box.
+// root defaults to document, but pass the not-yet-attached card element when building
+// a fresh card, since the box doesn't exist in the live document yet at that point.
+function renderUploadBox(target, root){
+  root = root || document;
+  const selector = target === 'before' ? '#beforeBox' : `#closeAfterBox-${target}`;
+  const box = root.querySelector(selector);
+  if(!box) return;
   const label = target === 'before' ? 'Before' : 'After';
-  const value = target === 'before' ? tempBeforeImage : tempAfterImage;
+  const value = target === 'before' ? tempBeforeImage : (tempCloseAfterImages[target] || "");
   if(value){
-    box.innerHTML = `<p>${label}</p><img src="${value}" alt="${label}"><button type="button" data-target="${target}" class="change-img-btn">Change</button>`;
+    box.innerHTML = `<p>${label}</p><img src="${value}" alt="${label}"><button type="button" class="change-img-btn" data-upload-target="${target}">Change</button>`;
   } else {
-    box.innerHTML = `<p>${label}</p><button type="button" data-target="${target}" class="change-img-btn">+ Add Image</button>`;
+    box.innerHTML = `<p>${label}</p><button type="button" class="change-img-btn" data-upload-target="${target}">+ Add Image</button>`;
   }
-  box.querySelector('.change-img-btn').addEventListener('click', ()=>{
-    pendingImageTarget = target;
-    hiddenImgInput.click();
-  });
 }
 renderUploadBox('before');
-renderUploadBox('after');
+
+// Single delegated listener on the whole document — this way an upload
+// button works the instant it exists in the DOM, no matter when or where
+// it was created, with no risk of a missed addEventListener call.
+document.addEventListener('click', (e)=>{
+  const btn = e.target.closest('.change-img-btn');
+  if(!btn) return;
+  const raw = btn.dataset.uploadTarget;
+  pendingImageTarget = (raw === 'before') ? 'before' : Number(raw);
+  hiddenImgInput.click();
+});
 
 hiddenImgInput.addEventListener('change', (e)=>{
   const file = e.target.files[0];
-  if(!file || !pendingImageTarget) return;
+  if(!file || pendingImageTarget === null) return;
   const reader = new FileReader();
   reader.onload = (evt)=>{
     if(pendingImageTarget === 'before'){
       tempBeforeImage = evt.target.result;
       renderUploadBox('before');
     } else {
-      tempAfterImage = evt.target.result;
-      renderUploadBox('after');
+      // by now the running-trade card is already in the live document
+      tempCloseAfterImages[pendingImageTarget] = evt.target.result;
+      renderUploadBox(pendingImageTarget, document);
     }
   };
   reader.readAsDataURL(file);
   e.target.value = '';
 });
 
+// ---- Add trade (opens it as a Running Trade) ----
 document.getElementById('addBtn').addEventListener('click', ()=>{
   const dateVal = document.getElementById('date').value;
   const pairVal = document.getElementById('pair').value.trim().toUpperCase();
   const dirVal = document.getElementById('direction').value;
   const rrVal = document.getElementById('plannedRR').value;
-  const moveVal = document.getElementById('marketMove').value;
-  const resultVal = document.getElementById('resultR').value;
   const logicVal = document.getElementById('logicInput').value.trim();
 
-  if(!dateVal || !pairVal || rrVal==='' || moveVal==='' || resultVal===''){
-    alert('Please fill in Date, Pair, Planned RR, Market Move, and Result before adding a trade.');
+  if(!dateVal || !pairVal || rrVal===''){
+    alert('Please fill in Date, Pair, and Planned RR before adding a trade.');
     return;
   }
   if(dateVal > todayISO()){
@@ -593,11 +605,12 @@ document.getElementById('addBtn').addEventListener('click', ()=>{
     pair: pairVal,
     direction: dirVal,
     plannedRR: Number(rrVal),
-    marketMove: Number(moveVal),
-    result: Number(resultVal),
+    marketMove: null,
+    result: null,
     logic: logicVal,
     beforeImage: tempBeforeImage,
-    afterImage: tempAfterImage
+    afterImage: "",
+    status: "running"
   });
 
   saveTrades();
@@ -605,41 +618,100 @@ document.getElementById('addBtn').addEventListener('click', ()=>{
   document.getElementById('entryForm').reset();
   document.getElementById('direction').value = 'BUY';
   tempBeforeImage = "";
-  tempAfterImage = "";
   renderUploadBox('before');
-  renderUploadBox('after');
   updateSummary();
 
-  alert('Trade added.');
+  switchToTab('running');
 });
 
-const MONTH_NAMES = ['January','February','March','April','May','June','July','August','September','October','November','December'];
+// ---- Running Trade tab: list + close form ----
+function renderRunningList(){
+  const listEl = document.getElementById('runningList');
+  const detailWrap = document.getElementById('runningDetailWrap');
+  listEl.innerHTML = '';
+  detailWrap.innerHTML = '';
 
-function getYearMonthInfo(dateStr){
-  const parts = dateStr.split('-');
-  const year = parts[0];
-  const monthNum = parseInt(parts[1], 10);
-  const monthName = MONTH_NAMES[monthNum-1] || 'Unknown';
-  return { year, monthNum, monthName, monthKey: `${monthName}-${year}` };
+  const runningIndexes = trades
+    .map((t,i)=>i)
+    .filter(i => trades[i].status === 'running')
+    .sort((a,b)=> trades[b].date.localeCompare(trades[a].date));
+
+  if(runningIndexes.length === 0){
+    listEl.innerHTML = '<p class="empty-msg">No running trades. Add one from the Trade tab.</p>';
+    return;
+  }
+
+  runningIndexes.forEach(i=>{
+    const card = buildCloseTradeForm(trades[i], i);
+    card.style.marginBottom = '24px';
+    detailWrap.appendChild(card);
+  });
 }
 
-function makeFolderHeaderRow(headingText, onBack){
-  const row = document.createElement('div');
-  row.className = 'folder-header-row';
+function buildCloseTradeForm(t, i){
+  const wrap = document.createElement('div');
+  wrap.className = 'trade-detail';
+  const dirClass = t.direction === 'BUY' ? 'buy' : 'sell';
 
-  const heading = document.createElement('h4');
-  heading.className = 'folder-heading';
-  heading.textContent = headingText;
-  row.appendChild(heading);
+  wrap.innerHTML = `
+    <h3>${t.date} · ${t.pair}</h3>
+    <div class="detail-grid">
+      <div><div class="k">Direction</div><span class="${dirClass}">${t.direction}</span></div>
+      <div><div class="k">Planned RR</div>${t.plannedRR}</div>
+    </div>
+    <div class="k" style="margin-bottom:6px;">Trade Logic</div>
+    <div class="detail-logic">${t.logic ? t.logic : 'No trade logic written for this trade.'}</div>
+    <div class="k" style="margin-bottom:8px;">Before</div>
+    ${t.beforeImage ? `<img src="${t.beforeImage}" class="close-before-img" alt="Before" style="width:150px;height:110px;object-fit:cover;border-radius:6px;border:1px solid var(--border);cursor:pointer;margin-bottom:18px;display:block;">` : `<div class="no-image" style="margin-bottom:18px;">No image</div>`}
 
-  const backBtn = document.createElement('button');
-  backBtn.type = 'button';
-  backBtn.className = 'folder-back-btn';
-  backBtn.textContent = 'Back';
-  backBtn.addEventListener('click', onBack);
-  row.appendChild(backBtn);
+    <div class="field-row">
+      <div class="field">
+        <label for="closeMarketMove-${i}">Market Move</label>
+        <input type="number" step="0.1" id="closeMarketMove-${i}" placeholder="e.g. -1">
+      </div>
+      <div class="field">
+        <label for="closeResult-${i}">Result (R)</label>
+        <input type="number" step="0.1" id="closeResult-${i}" placeholder="e.g. -1">
+      </div>
+    </div>
 
-  return row;
+    <div class="img-upload-row" style="margin:16px 0;">
+      <div class="img-upload-box" id="closeAfterBox-${i}">
+        <p>After</p>
+        <button type="button">+ Add Image</button>
+      </div>
+    </div>
+
+    <button class="add" id="closeTradeBtn-${i}" type="button">CLOSE TRADE</button>
+  `;
+
+  const beforeImgEl = wrap.querySelector('.close-before-img');
+  if(beforeImgEl) beforeImgEl.addEventListener('click', ()=>openImagePreview('Before — ' + t.pair, t.beforeImage));
+
+  // wrap isn't attached to the document yet at this point, so scope the
+  // lookup to wrap itself rather than document.
+  renderUploadBox(i, wrap);
+
+  wrap.querySelector(`#closeTradeBtn-${i}`).addEventListener('click', ()=>{
+    const moveVal = wrap.querySelector(`#closeMarketMove-${i}`).value;
+    const resultVal = wrap.querySelector(`#closeResult-${i}`).value;
+    if(moveVal === '' || resultVal === ''){
+      alert('Please fill in Market Move and Result to close this trade.');
+      return;
+    }
+    trades[i].marketMove = Number(moveVal);
+    trades[i].result = Number(resultVal);
+    trades[i].afterImage = tempCloseAfterImages[i] || "";
+    trades[i].status = 'closed';
+    delete tempCloseAfterImages[i];
+    saveTrades();
+    updateSummary();
+
+    alert('Trade closed.');
+    renderRunningList();
+  });
+
+  return wrap;
 }
 
 function renderTradeList(){
@@ -648,103 +720,43 @@ function renderTradeList(){
   listEl.innerHTML = '';
   detailWrap.innerHTML = '';
 
-  if(trades.length === 0){
-    listEl.innerHTML = '<p class="empty-msg">No trades logged yet. Add one from the Trade tab.</p>';
+  // trades saved before the running/closed workflow have no status field —
+  // treat those as closed so existing history keeps showing up here
+  const closedIndexes = trades
+    .map((t,i)=>i)
+    .filter(i => trades[i].status === 'closed' || trades[i].status === undefined);
+
+  if(closedIndexes.length === 0){
+    listEl.innerHTML = '<p class="empty-msg">No closed trades yet. Close a running trade to see it here.</p>';
     return;
   }
 
-  // ---- Level 2: trades inside a selected month folder ----
-  if(selectedYear && selectedMonthKey){
-    listEl.appendChild(makeFolderHeaderRow('📁 ' + selectedMonthKey, ()=>{
-      selectedMonthKey = null;
-      selectedTradeIndex = null;
-      renderTradeList();
-    }));
+  const chipsWrap = document.createElement('div');
+  chipsWrap.className = 'trade-list';
 
-    const chipsWrap = document.createElement('div');
-    chipsWrap.className = 'trade-list';
-    trades.forEach((t, i)=>{
-      const info = getYearMonthInfo(t.date);
-      if(info.year === selectedYear && info.monthKey === selectedMonthKey){
-        const chip = document.createElement('button');
-        chip.type = 'button';
-        chip.className = 'trade-chip' + (selectedTradeIndex === i ? ' selected' : '');
-        chip.textContent = 'Trade ' + (i+1);
-        chip.addEventListener('click', ()=>{
-          selectedTradeIndex = (selectedTradeIndex === i) ? null : i;
-          renderTradeList();
-        });
-        chipsWrap.appendChild(chip);
-      }
-    });
-    listEl.appendChild(chipsWrap);
-
-    if(selectedTradeIndex !== null && trades[selectedTradeIndex]){
-      detailWrap.appendChild(buildTradeDetail(trades[selectedTradeIndex], selectedTradeIndex));
-    }
-    return;
-  }
-
-  // ---- Level 1: month folders inside a selected year folder ----
-  if(selectedYear && !selectedMonthKey){
-    listEl.appendChild(makeFolderHeaderRow('📁 ' + selectedYear, ()=>{
-      selectedYear = null;
-      renderTradeList();
-    }));
-
-    const monthCounts = new Map(); // monthKey -> {count, monthNum}
-    trades.forEach(t=>{
-      const info = getYearMonthInfo(t.date);
-      if(info.year === selectedYear){
-        const existing = monthCounts.get(info.monthKey);
-        monthCounts.set(info.monthKey, { count: (existing ? existing.count : 0) + 1, monthNum: info.monthNum });
-      }
-    });
-
-    const sortedMonths = [...monthCounts.entries()].sort((a,b)=> b[1].monthNum - a[1].monthNum);
-
-    const folderWrap = document.createElement('div');
-    folderWrap.className = 'trade-list';
-    sortedMonths.forEach(([monthKey, info])=>{
-      const folder = document.createElement('button');
-      folder.type = 'button';
-      folder.className = 'folder-chip';
-      folder.innerHTML = `📁 ${monthKey} <span class="folder-count">${info.count} trade${info.count===1?'':'s'}</span>`;
-      folder.addEventListener('click', ()=>{
-        selectedMonthKey = monthKey;
-        selectedTradeIndex = null;
-        renderTradeList();
-      });
-      folderWrap.appendChild(folder);
-    });
-    listEl.appendChild(folderWrap);
-    return;
-  }
-
-  // ---- Level 0: year folders ----
-  const yearCounts = new Map();
-  trades.forEach(t=>{
-    const info = getYearMonthInfo(t.date);
-    yearCounts.set(info.year, (yearCounts.get(info.year) || 0) + 1);
+  // most recent trade first; ties (same date) fall back to entry order, newest last-added first
+  const order = closedIndexes.sort((a,b)=>{
+    if(trades[b].date !== trades[a].date) return trades[b].date.localeCompare(trades[a].date);
+    return b - a;
   });
-  const sortedYears = [...yearCounts.entries()].sort((a,b)=> b[0] - a[0]);
 
-  const yearWrap = document.createElement('div');
-  yearWrap.className = 'trade-list';
-  sortedYears.forEach(([year, count])=>{
-    const folder = document.createElement('button');
-    folder.type = 'button';
-    folder.className = 'folder-chip';
-    folder.innerHTML = `📁 ${year} <span class="folder-count">${count} trade${count===1?'':'s'}</span>`;
-    folder.addEventListener('click', ()=>{
-      selectedYear = year;
-      selectedMonthKey = null;
-      selectedTradeIndex = null;
+  order.forEach(i=>{
+    const t = trades[i];
+    const chip = document.createElement('button');
+    chip.type = 'button';
+    chip.className = 'trade-chip' + (selectedTradeIndex === i ? ' selected' : '');
+    chip.textContent = t.date;
+    chip.addEventListener('click', ()=>{
+      selectedTradeIndex = (selectedTradeIndex === i) ? null : i;
       renderTradeList();
     });
-    yearWrap.appendChild(folder);
+    chipsWrap.appendChild(chip);
   });
-  listEl.appendChild(yearWrap);
+  listEl.appendChild(chipsWrap);
+
+  if(selectedTradeIndex !== null && trades[selectedTradeIndex]){
+    detailWrap.appendChild(buildTradeDetail(trades[selectedTradeIndex], selectedTradeIndex));
+  }
 }
 
 function buildTradeDetail(t, i){
@@ -754,7 +766,7 @@ function buildTradeDetail(t, i){
   const resultClass = t.result >= 0 ? 'result-pos' : 'result-neg';
 
   wrap.innerHTML = `
-    <h3>Trade ${i+1}</h3>
+    <h3>${t.date}</h3>
     <div class="detail-grid">
       <div><div class="k">Date</div>${t.date}</div>
       <div><div class="k">Pair</div>${t.pair}</div>
@@ -796,10 +808,11 @@ document.getElementById('imgModalClose').addEventListener('click', ()=>{
 });
 
 function updateSummary(){
-  const total = trades.length;
-  const wins = trades.filter(t=>t.result > 0).length;
-  const losses = trades.filter(t=>t.result < 0).length;
-  const totalRR = trades.reduce((s,t)=>s+Number(t.result),0);
+  const closed = trades.filter(t => t.status === 'closed' || t.status === undefined);
+  const total = closed.length;
+  const wins = closed.filter(t=>t.result > 0).length;
+  const losses = closed.filter(t=>t.result < 0).length;
+  const totalRR = closed.reduce((s,t)=>s+Number(t.result),0);
   const winRate = total>0 ? (wins/total*100) : 0;
 
   document.getElementById('totalTrades').textContent = total;
@@ -838,7 +851,8 @@ document.getElementById('exportBtn').addEventListener('click', async ()=>{
       cell.alignment = { horizontal:'center', vertical:'middle' };
     });
 
-    trades.forEach((t, idx)=>{
+    const closedTrades = trades.filter(t => t.status === 'closed' || t.status === undefined);
+    closedTrades.forEach((t, idx)=>{
       const rowIndex = idx + 2;
       const row = sheet.getRow(rowIndex);
       row.getCell(1).value = 'Trade ' + (idx+1);
