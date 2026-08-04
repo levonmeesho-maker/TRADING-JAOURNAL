@@ -97,7 +97,10 @@
   }
   form.entry input,
   form.entry select,
-  form.entry textarea{
+  form.entry textarea,
+  .field input,
+  .field select,
+  .field textarea{
     font-family: Arial, Helvetica, sans-serif;
     font-size:0.95rem;
     padding:11px 14px;
@@ -110,17 +113,24 @@
   }
   form.entry input:hover,
   form.entry select:hover,
-  form.entry textarea:hover{
+  form.entry textarea:hover,
+  .field input:hover,
+  .field select:hover,
+  .field textarea:hover{
     border-color:#cbd5e1;
   }
   form.entry input:focus,
   form.entry select:focus,
-  form.entry textarea:focus{
+  form.entry textarea:focus,
+  .field input:focus,
+  .field select:focus,
+  .field textarea:focus{
     outline:none;
     border-color:var(--gold);
     box-shadow:0 0 0 3px rgba(13,148,136,0.15);
   }
-  form.entry textarea{
+  form.entry textarea,
+  .field textarea{
     min-height:100px;
     resize:vertical;
     font-family: Arial, sans-serif;
@@ -703,20 +713,20 @@ function buildCloseTradeForm(t, i){
     <div class="k" style="margin-bottom:8px;">Before</div>
     ${t.beforeImage ? `<img src="${t.beforeImage}" class="close-before-img" alt="Before" style="width:150px;height:110px;object-fit:cover;border-radius:6px;border:1px solid var(--border);cursor:pointer;margin-bottom:18px;display:block;">` : `<div class="no-image" style="margin-bottom:18px;">No image</div>`}
 
-    <div class="field-row">
+    <div class="field-row" style="margin-top:20px;">
       <div class="field">
         <label for="closeMarketMove-${i}">Market Move</label>
-        <input type="number" step="0.1" id="closeMarketMove-${i}" placeholder="e.g. -1">
+        <input type="number" step="0.1" id="closeMarketMove-${i}" placeholder="e.g. 15">
       </div>
       <div class="field">
         <label for="closeResult-${i}">Result (R)</label>
-        <input type="number" step="0.1" id="closeResult-${i}" placeholder="e.g. -1">
+        <input type="number" step="0.1" id="closeResult-${i}" placeholder="e.g. 2">
       </div>
     </div>
 
-    <div class="field" style="margin-bottom:16px;">
+    <div class="field" style="margin-top:20px; margin-bottom:16px;">
       <label for="closeWhatMarketGave-${i}">What Market Gave</label>
-      <textarea id="closeWhatMarketGave-${i}" placeholder="What did the market actually give you"></textarea>
+      <textarea id="closeWhatMarketGave-${i}" placeholder="How Market Reacts....?"></textarea>
     </div>
 
     <div class="img-upload-row" style="margin:16px 0;">
