@@ -6,15 +6,17 @@
 <script src="https://cdnjs.cloudflare.com/ajax/libs/exceljs/4.4.0/exceljs.min.js"></script>
 <style>
   :root{
-    --gold:#a9791f;
-    --gold-dark:#8a6416;
-    --cream:#fffefb;
-    --ink:#1c1c1c;
-    --border:#d8d2c4;
-    --header-bg:#e7dcc0;
-    --green:#1a7a34;
-    --red:#c0392b;
-    --muted:#8a8a8a;
+    --gold:#0d9488;
+    --gold-dark:#0f766e;
+    --cream:#f8fafc;
+    --ink:#1e293b;
+    --border:#e2e8f0;
+    --header-bg:#e6f4f1;
+    --green:#16a34a;
+    --red:#dc2626;
+    --muted:#64748b;
+    --accent-soft:#f0faf9;
+    --accent-soft-hover:#d9f2ef;
   }
   *{box-sizing:border-box;}
   body{
@@ -30,16 +32,18 @@
     align-items:flex-start;
     border-bottom:2px solid var(--gold);
     padding:28px 32px 14px;
+    background:#fff;
   }
   h1{
-    color:var(--gold);
+    color:var(--gold-dark);
     font-size:1.9rem;
     margin:0;
     letter-spacing:0.5px;
+    font-weight:700;
   }
   .subtitle{ text-align:center; flex:1; }
-  .subtitle h2{ margin:6px 0 0; font-size:1.2rem; font-weight:700; }
-  .date{ color:#444; font-size:0.9rem; margin-top:4px; }
+  .subtitle h2{ margin:6px 0 0; font-size:1.2rem; font-weight:700; color:var(--ink); }
+  .date{ color:var(--muted); font-size:0.9rem; margin-top:4px; }
 
   nav.tabbar{
     display:flex;
@@ -50,7 +54,7 @@
     right:0;
     bottom:0;
     z-index:500;
-    box-shadow:0 -2px 10px rgba(0,0,0,0.08);
+    box-shadow:0 -2px 10px rgba(15,23,42,0.08);
   }
   nav.tabbar button{
     flex:1;
@@ -63,13 +67,14 @@
     color:var(--gold-dark);
     cursor:pointer;
     border-top:3px solid transparent;
+    transition:background 0.15s ease, color 0.15s ease;
   }
   nav.tabbar button.active{
     color:var(--ink);
     border-top:3px solid var(--gold);
-    background:var(--cream);
+    background:#fff;
   }
-  nav.tabbar button:hover{ background:#f3ead0; }
+  nav.tabbar button:hover{ background:var(--accent-soft-hover); }
 
   .page{ display:none; padding:28px 32px; }
   .page.active{ display:block; }
@@ -77,44 +82,63 @@
   form.entry{
     display:flex;
     flex-direction:column;
-    gap:16px;
+    gap:18px;
     max-width:560px;
   }
   .field-row{ display:flex; gap:14px; flex-wrap:wrap; }
-  .field{ display:flex; flex-direction:column; gap:4px; flex:1; min-width:150px; }
+  .field{ display:flex; flex-direction:column; gap:6px; flex:1; min-width:150px; }
   .field label{
     font-family: Arial, Helvetica, sans-serif;
     font-size:0.78rem;
     color:var(--muted);
     text-transform:uppercase;
-    letter-spacing:0.4px;
+    letter-spacing:0.5px;
+    font-weight:700;
   }
-  form.entry input, form.entry select, form.entry textarea{
+  form.entry input,
+  form.entry select,
+  form.entry textarea{
     font-family: Arial, Helvetica, sans-serif;
     font-size:0.95rem;
-    padding:10px 12px;
-    border:1px solid #ccc;
-    border-radius:4px;
+    padding:11px 14px;
+    border:1.5px solid var(--border);
+    border-radius:8px;
     color:var(--ink);
     background:#fff;
     width:100%;
+    transition:border-color 0.15s ease, box-shadow 0.15s ease;
+  }
+  form.entry input:hover,
+  form.entry select:hover,
+  form.entry textarea:hover{
+    border-color:#cbd5e1;
+  }
+  form.entry input:focus,
+  form.entry select:focus,
+  form.entry textarea:focus{
+    outline:none;
+    border-color:var(--gold);
+    box-shadow:0 0 0 3px rgba(13,148,136,0.15);
   }
   form.entry textarea{
     min-height:100px;
     resize:vertical;
     font-family: Arial, sans-serif;
+    line-height:1.5;
   }
 
   .img-upload-row{ display:flex; gap:16px; flex-wrap:wrap; }
   .img-upload-box{
     flex:1;
     min-width:160px;
-    border:1px dashed var(--gold);
-    border-radius:6px;
-    padding:14px;
+    border:1.5px dashed var(--gold);
+    border-radius:10px;
+    padding:16px;
     text-align:center;
-    background:#fffaf0;
+    background:var(--accent-soft);
+    transition:background 0.15s ease, border-color 0.15s ease;
   }
+  .img-upload-box:hover{ background:var(--accent-soft-hover); }
   .img-upload-box p{
     margin:0 0 10px;
     font-family: Arial, sans-serif;
@@ -127,21 +151,23 @@
   .img-upload-box img{
     max-width:100%;
     max-height:140px;
-    border-radius:4px;
+    border-radius:6px;
     display:block;
     margin:0 auto 10px;
   }
   .img-upload-box button{
     background:#fff;
-    border:1px solid var(--gold);
+    border:1.5px solid var(--gold);
     color:var(--gold-dark);
     font-family: Arial, sans-serif;
     font-size:0.8rem;
-    padding:8px 14px;
-    border-radius:4px;
+    font-weight:600;
+    padding:9px 16px;
+    border-radius:6px;
     cursor:pointer;
+    transition:background 0.15s ease;
   }
-  .img-upload-box button:hover{ background:#f3ead0; }
+  .img-upload-box button:hover{ background:var(--accent-soft-hover); }
 
   button.add{
     background:var(--gold);
@@ -151,28 +177,31 @@
     font-family: Arial, Helvetica, sans-serif;
     font-weight:bold;
     letter-spacing:0.5px;
-    border-radius:4px;
+    border-radius:8px;
     cursor:pointer;
     font-size:0.95rem;
     align-self:flex-start;
+    transition:background 0.15s ease, transform 0.1s ease;
   }
   button.add:hover{ background:var(--gold-dark); }
+  button.add:active{ transform:scale(0.98); }
 
   .export-btn{
-    background:#1f4a2e;
+    background:#065f46;
     color:#fff;
     border:none;
     padding:12px 20px;
     font-family: Arial, Helvetica, sans-serif;
     font-weight:bold;
     letter-spacing:0.5px;
-    border-radius:4px;
+    border-radius:8px;
     cursor:pointer;
     font-size:0.9rem;
     margin-bottom:22px;
+    transition:background 0.15s ease;
   }
-  .export-btn:hover{ background:#173a23; }
-  .export-btn:disabled{ background:#9c9c9c; cursor:wait; }
+  .export-btn:hover{ background:#064e3b; }
+  .export-btn:disabled{ background:#94a3b8; cursor:wait; }
 
   .save-status{
     font-family: Arial, Helvetica, sans-serif;
@@ -189,35 +218,37 @@
   }
   .trade-chip{
     background:#fff;
-    border:1px solid var(--gold);
+    border:1.5px solid var(--gold);
     color:var(--gold-dark);
     font-family: Arial, sans-serif;
     font-weight:bold;
     font-size:0.9rem;
     padding:12px 20px;
-    border-radius:6px;
+    border-radius:8px;
     cursor:pointer;
+    transition:background 0.15s ease, color 0.15s ease;
   }
-  .trade-chip:hover{ background:#f3ead0; }
+  .trade-chip:hover{ background:var(--accent-soft-hover); }
   .trade-chip.selected{ background:var(--gold); color:#fff; }
 
   .folder-chip{
-    background:#fffaf0;
-    border:1px solid var(--gold);
+    background:var(--accent-soft);
+    border:1.5px solid var(--gold);
     color:var(--gold-dark);
     font-family: Arial, sans-serif;
     font-weight:bold;
     font-size:0.95rem;
     padding:16px 22px;
-    border-radius:8px;
+    border-radius:10px;
     cursor:pointer;
     display:flex;
     flex-direction:column;
     align-items:flex-start;
     gap:6px;
     min-width:160px;
+    transition:background 0.15s ease;
   }
-  .folder-chip:hover{ background:#f3ead0; }
+  .folder-chip:hover{ background:var(--accent-soft-hover); }
   .folder-count{
     font-weight:normal;
     font-size:0.78rem;
@@ -228,6 +259,7 @@
     color:var(--gold-dark);
     margin:0;
     font-size:1.1rem;
+    font-weight:700;
   }
   .folder-header-row{
     display:flex;
@@ -237,16 +269,17 @@
   }
   .folder-back-btn{
     background:#fff;
-    border:1px solid var(--gold);
+    border:1.5px solid var(--gold);
     color:var(--gold-dark);
     font-family: Arial, sans-serif;
     font-weight:bold;
     font-size:0.85rem;
     cursor:pointer;
     padding:8px 18px;
-    border-radius:6px;
+    border-radius:8px;
+    transition:background 0.15s ease;
   }
-  .folder-back-btn:hover{ background:#f3ead0; }
+  .folder-back-btn:hover{ background:var(--accent-soft-hover); }
 
   .empty-msg{
     font-family: Arial, sans-serif;
@@ -256,15 +289,17 @@
 
   .trade-detail{
     border:1px solid var(--border);
-    border-radius:8px;
+    border-radius:10px;
     padding:22px;
     max-width:640px;
     background:#fff;
+    box-shadow:0 1px 3px rgba(15,23,42,0.06);
   }
   .trade-detail h3{
     margin:0 0 16px;
     font-family: Georgia, serif;
     color:var(--gold-dark);
+    font-weight:700;
   }
   .detail-grid{
     display:grid;
@@ -274,12 +309,13 @@
     font-size:0.95rem;
     margin-bottom:18px;
   }
-  .detail-grid .k{
+  .k{
     font-size:0.75rem;
     text-transform:uppercase;
     letter-spacing:0.4px;
     color:var(--muted);
     margin-bottom:2px;
+    font-weight:700;
   }
   .buy{ color:var(--green); font-weight:700; }
   .sell{ color:var(--red); font-weight:700; }
@@ -289,9 +325,9 @@
   .detail-logic{
     font-family: Arial, sans-serif;
     font-size:0.92rem;
-    background:#faf6ea;
+    background:var(--accent-soft);
     border:1px solid var(--border);
-    border-radius:6px;
+    border-radius:8px;
     padding:14px;
     margin-bottom:18px;
     white-space:pre-wrap;
@@ -305,20 +341,21 @@
     text-transform:uppercase;
     color:var(--muted);
     margin:0 0 8px;
+    font-weight:700;
   }
   .detail-images img{
     width:150px;
     height:110px;
     object-fit:cover;
-    border-radius:6px;
+    border-radius:8px;
     border:1px solid var(--border);
     cursor:pointer;
   }
   .no-image{
     width:150px;
     height:110px;
-    border:1px dashed var(--border);
-    border-radius:6px;
+    border:1.5px dashed var(--border);
+    border-radius:8px;
     display:flex;
     align-items:center;
     justify-content:center;
@@ -327,17 +364,17 @@
     font-size:0.8rem;
   }
 
-  h3.summary-title{ font-size:1.4rem; margin:0 0 16px; }
-  table.summary{ width:100%; max-width:520px; border-collapse:collapse; font-family: Arial, Helvetica, sans-serif; }
+  h3.summary-title{ font-size:1.4rem; margin:0 0 16px; color:var(--ink); font-weight:700; }
+  table.summary{ width:100%; max-width:520px; border-collapse:collapse; font-family: Arial, Helvetica, sans-serif; background:#fff; border-radius:8px; overflow:hidden; }
   table.summary td{ padding:14px 16px; border:1px solid var(--border); font-family: Georgia, serif; }
-  table.summary td.label{ text-align:center; width:50%; }
-  table.summary td.value{ text-align:center; }
+  table.summary td.label{ text-align:center; width:50%; color:var(--muted); font-weight:700; }
+  table.summary td.value{ text-align:center; font-weight:bold; color:var(--ink); }
 
   .modal-overlay{
     display:none;
     position:fixed;
     inset:0;
-    background:rgba(0,0,0,0.5);
+    background:rgba(15,23,42,0.55);
     z-index:1000;
     align-items:center;
     justify-content:center;
@@ -345,24 +382,26 @@
   .modal-overlay.open{ display:flex; }
   .modal-box{
     background:#fff;
-    border-radius:8px;
+    border-radius:10px;
     padding:20px;
     width:90%;
     max-width:520px;
     text-align:center;
     font-family: Arial, Helvetica, sans-serif;
   }
-  .modal-box img{ max-width:100%; max-height:60vh; border-radius:4px; }
+  .modal-box img{ max-width:100%; max-height:60vh; border-radius:6px; }
   .modal-box button{
     margin-top:16px;
     background:var(--gold);
     color:#fff;
     border:none;
     padding:9px 20px;
-    border-radius:4px;
+    border-radius:8px;
     cursor:pointer;
     font-family: Arial, sans-serif;
+    transition:background 0.15s ease;
   }
+  .modal-box button:hover{ background:var(--gold-dark); }
 
   @media (max-width:700px){
     header{ flex-direction:column; gap:8px; padding:20px; }
@@ -376,6 +415,7 @@
 
 <header>
   <h1>Trading Journal</h1>
+  <div class="subtitle"><h2>UNCHARTED.DEMON</h2></div>
   <div class="date" id="todayDate"></div>
 </header>
 
@@ -455,7 +495,7 @@
 
 <div class="modal-overlay" id="imgModal">
   <div class="modal-box">
-    <h4 id="imgModalTitle" style="margin-top:0;font-family:Georgia,serif;color:var(--gold-dark);">Image</h4>
+    <h4 id="imgModalTitle" style="margin-top:0;font-family:Georgia,serif;color:var(--gold-dark);font-weight:700;">Image</h4>
     <img id="imgModalPic" src="" alt="Trade screenshot">
     <div><button id="imgModalClose" type="button">Close</button></div>
   </div>
@@ -674,9 +714,10 @@ function buildCloseTradeForm(t, i){
         <input type="number" step="0.1" id="closeResult-${i}" placeholder="e.g. -1">
       </div>
     </div>
-	<div class="field">
-      <label for="logicInput">market behaviour </label>
-      <textarea id="logicInput" placeholder="what you get to see"></textarea>
+
+    <div class="field" style="margin-bottom:16px;">
+      <label for="closeWhatMarketGave-${i}">What Market Gave</label>
+      <textarea id="closeWhatMarketGave-${i}" placeholder="What did the market actually give you"></textarea>
     </div>
 
     <div class="img-upload-row" style="margin:16px 0;">
@@ -699,6 +740,7 @@ function buildCloseTradeForm(t, i){
   wrap.querySelector(`#closeTradeBtn-${i}`).addEventListener('click', ()=>{
     const moveVal = wrap.querySelector(`#closeMarketMove-${i}`).value;
     const resultVal = wrap.querySelector(`#closeResult-${i}`).value;
+    const whatMarketGaveVal = wrap.querySelector(`#closeWhatMarketGave-${i}`).value.trim();
     if(moveVal === '' || resultVal === ''){
       alert('Please fill in Market Move and Result to close this trade.');
       return;
@@ -706,6 +748,7 @@ function buildCloseTradeForm(t, i){
     trades[i].marketMove = Number(moveVal);
     trades[i].result = Number(resultVal);
     trades[i].afterImage = tempCloseAfterImages[i] || "";
+    trades[i].whatMarketGave = whatMarketGaveVal;
     trades[i].status = 'closed';
     delete tempCloseAfterImages[i];
     saveTrades();
@@ -781,6 +824,8 @@ function buildTradeDetail(t, i){
     </div>
     <div class="k" style="margin-bottom:6px;">Trade Logic</div>
     <div class="detail-logic">${t.logic ? t.logic : 'No trade logic written for this trade.'}</div>
+    <div class="k" style="margin-bottom:6px;">What Market Gave</div>
+    <div class="detail-logic">${t.whatMarketGave ? t.whatMarketGave : 'No notes written when this trade was closed.'}</div>
     <div class="detail-images">
       <div>
         <p>Before</p>
@@ -844,6 +889,7 @@ document.getElementById('exportBtn').addEventListener('click', async ()=>{
       { header: 'Market Move', key: 'marketMove', width: 13 },
       { header: 'Result (R)', key: 'result', width: 12 },
       { header: 'Trade Logic', key: 'logic', width: 40 },
+      { header: 'What Market Gave', key: 'whatMarketGave', width: 40 },
       { header: 'Before', key: 'before', width: 16 },
       { header: 'After', key: 'after', width: 16 }
     ];
@@ -851,7 +897,7 @@ document.getElementById('exportBtn').addEventListener('click', async ()=>{
     const headerRow = sheet.getRow(1);
     headerRow.eachCell(cell=>{
       cell.font = { bold: true };
-      cell.fill = { type:'pattern', pattern:'solid', fgColor:{argb:'FFE7DCC0'} };
+      cell.fill = { type:'pattern', pattern:'solid', fgColor:{argb:'FFE6F4F1'} };
       cell.alignment = { horizontal:'center', vertical:'middle' };
     });
 
@@ -863,17 +909,19 @@ document.getElementById('exportBtn').addEventListener('click', async ()=>{
       row.getCell(2).value = t.date;
       row.getCell(3).value = t.pair;
       row.getCell(4).value = t.direction;
-      row.getCell(4).font = { color: { argb: t.direction === 'BUY' ? 'FF1A7A34' : 'FFC0392B' }, bold:true };
+      row.getCell(4).font = { color: { argb: t.direction === 'BUY' ? 'FF16A34A' : 'FFDC2626' }, bold:true };
       row.getCell(5).value = t.plannedRR;
       row.getCell(6).value = t.marketMove;
       row.getCell(7).value = t.result;
-      row.getCell(7).font = { color: { argb: t.result >= 0 ? 'FF1A7A34' : 'FFC0392B' }, bold:true };
+      row.getCell(7).font = { color: { argb: t.result >= 0 ? 'FF16A34A' : 'FFDC2626' }, bold:true };
       row.getCell(8).value = t.logic || '';
       row.getCell(8).alignment = { wrapText: true, vertical: 'top' };
+      row.getCell(9).value = t.whatMarketGave || '';
+      row.getCell(9).alignment = { wrapText: true, vertical: 'top' };
       row.height = 80;
 
       ['beforeImage','afterImage'].forEach((field, colOffset)=>{
-        const col = 9 + colOffset;
+        const col = 10 + colOffset;
         if(t[field]){
           const match = t[field].match(/^data:image\/(png|jpeg|jpg|gif);base64,/);
           const ext = match ? (match[1] === 'jpg' ? 'jpeg' : match[1]) : 'png';
